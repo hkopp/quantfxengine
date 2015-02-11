@@ -5,6 +5,9 @@ from event import TickEvent
 
 
 class StreamingForexPrices(object):
+  """
+  A class to connect to the broker and stream prices
+  """
   def __init__(
     self, domain, access_token,
     account_id, instruments, events_queue
