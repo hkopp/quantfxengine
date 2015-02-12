@@ -2,10 +2,10 @@ import Queue
 import threading
 import time
 
-from execution import Execution
-from settings import STREAM_DOMAIN, API_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID
+from execution import Execution, MockExecution
+from settings import STREAM_DOMAIN, API_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID, BACKTEST, BACKTESTFILE
 from strategy import TestRandomStrategy
-from streaming import StreamingForexPrices
+from streaming import StreamingForexPrices, StreamingPricesFromFile
 
 
 def trade(events, strategy, execution):
@@ -39,16 +39,23 @@ if __name__ == "__main__":
     instrument = "EUR_USD"
     units = 10000
 
-    # Create the OANDA market price streaming class
-    # making sure to provide authentication commands
-    prices = StreamingForexPrices(
-        STREAM_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID,
-        instrument, events
-    )
-
-    # Create the execution handler making sure to
-    # provide authentication commands
-    execution = Execution(API_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID)
+    if BACKTEST:
+        # Create the price streaming class
+        prices = StreamingPricesFromFile(
+            BACKTESTFILE, events
+        )
+        # Create the mock execution handler
+        execution = MockExecution()
+    else:
+        # Create the OANDA market price streaming class
+        # making sure to provide authentication commands
+        prices = StreamingForexPrices(
+            STREAM_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID,
+            instrument, events
+        )
+        # Create the execution handler making sure to
+        # provide authentication commands
+        execution = Execution(API_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID)
 
     # Create the strategy/signal generator, passing the
     # instrument, quantity of units and the events queue

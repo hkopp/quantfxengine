@@ -1,5 +1,7 @@
 import requests
 import json
+import csv
+import time
 
 from event import TickEvent
 
@@ -51,3 +53,28 @@ class StreamingForexPrices(object):
                     ask = msg["tick"]["ask"]
                     tev = TickEvent(instrument, time, bid, ask)
                     self.events_queue.put(tev)
+
+
+class StreamingPricesFromFile(object):
+    """
+    A class for reading in csv-files and backtesting.
+    The csv-file has to be in the form
+    instrument,timestamp,bid,ask
+    """
+    def __init__(self, csv_file, events_queue):
+        self.csv_file=csv_file
+        self.events_queue = events_queue
+
+    def stream_to_queue(self):
+        file=open(self.csv_file, 'rb')
+        for row in csv.reader(file ,delimiter=','):
+            instrument, timestamp, bid, ask = row
+            print("instrument = "+str(instrument)+" "
+                "timestamp = "+str(timestamp)+" "
+                "bid = "+str(bid)+" "
+                "ask = "+str(ask)
+            )
+            tev = TickEvent(instrument, timestamp, bid, ask)
+            self.events_queue.put(tev)
+            time.sleep(1)
+        self.close(self.csv_file)

@@ -30,3 +30,16 @@ class Execution(object):
         )
         response = self.conn.getresponse().read()
         print response
+
+class MockExecution(object):
+    """
+    A mock execution object which does not trade externally
+    Very useful for backtesting purposes
+    """
+    def execute_order(self, event):
+        print("Would have executed: "
+                "instrument: "+ str(event.instrument)+
+                "units: "+ str(event.units)+
+                "type: "+ str(event.order_type)+
+                "side: "+ str(event.side)
+        )

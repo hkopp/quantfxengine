@@ -18,3 +18,7 @@ STREAM_DOMAIN = ENVIRONMENTS["streaming"][DOMAIN]
 API_DOMAIN = ENVIRONMENTS["api"][DOMAIN]
 ACCESS_TOKEN = os.environ.get('OANDA_API_ACCESS_TOKEN', None)
 ACCOUNT_ID = os.environ.get('OANDA_API_ACCOUNT_ID', None)
+
+#Backtesting on a file
+BACKTEST = True
+BACKTESTFILE = 'test.csv'
