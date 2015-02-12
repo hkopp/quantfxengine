@@ -1,0 +1,10 @@
+#doxygen doc-generation
+doxy.conf
+html
+latex
+
+#secret environment variables
+sourcemerc
+
+#ctags tagfile
+tags
