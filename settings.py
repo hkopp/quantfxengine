@@ -1,3 +1,5 @@
+import os
+
 ENVIRONMENTS = {
   "streaming": {
     "real": "stream-fxtrade.oanda.com",
