@@ -12,13 +12,12 @@ def trade(events, strategy, execution):
     """
     Carries out an infinite while loop that polls the
     events queue and directs each event to either the
-    strategy component of the execution handler. The
-    loop will then pause for "heartbeat" seconds and
-    continue.
+    strategy component of the execution handler.
     """
     while True:
         try:
-            event = events.get(False)
+            event = events.get(True,0.5)
+            #block and wait a half second if queue is empty
         except Queue.Empty:
             pass
         else:
@@ -28,7 +27,6 @@ def trade(events, strategy, execution):
                 elif event.type == 'ORDER':
                     print "Executing order!"
                     execution.execute_order(event)
-        time.sleep(heartbeat)
 
 
 if __name__ == "__main__":
