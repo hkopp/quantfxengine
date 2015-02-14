@@ -76,5 +76,6 @@ class StreamingPricesFromFile(object):
             )
             tev = TickEvent(instrument, timestamp, bid, ask)
             self.events_queue.put(tev)
-            time.sleep(1)
-        self.close(self.csv_file)
+            time.sleep(.05)
+            #do not flood the queue
+        file.close()
