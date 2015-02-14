@@ -72,19 +72,33 @@ class StreamingPricesFromFile(object):
         self.stoprequest = stoprequest
 
     def stream_to_queue(self):
+        #check if file exists
+        try:
+            f=open(self.csv_file, 'rb')
+            f.close()
+        except Exception as e:
+            print("Caught exception when opening backtesting file\n" + str(e))
+            return
+
+        #open file and read from it
         file=open(self.csv_file, 'rb')
-        for row in csv.reader(file ,delimiter=','):
-            # check if we have received a stoprequest
-            if self.stoprequest.isSet():
-                break
-            instrument, timestamp, bid, ask = row
-            print("instrument = "+str(instrument)+" "
-                "timestamp = "+str(timestamp)+" "
-                "bid = "+str(bid)+" "
-                "ask = "+str(ask)
-            )
-            tev = TickEvent(instrument, timestamp, bid, ask)
-            self.events_queue.put(tev)
-            time.sleep(.05)
-            #do not flood the queue
-        file.close()
+        try:
+            for row in csv.reader(file ,delimiter=','):
+                # check if we have received a stoprequest
+                if self.stoprequest.isSet():
+                    break
+                instrument, timestamp, bid, ask = row
+                print("instrument = "+str(instrument)+" "
+                    "timestamp = "+str(timestamp)+" "
+                    "bid = "+str(bid)+" "
+                    "ask = "+str(ask)
+                )
+                tev = TickEvent(instrument, timestamp, bid, ask)
+                self.events_queue.put(tev)
+                time.sleep(.05)
+                #do not flood the queue
+        except Exception as e:
+            print("Caught exception when reading from backtesting file\n" + str(e))
+            return
+        finally:
+            file.close()
