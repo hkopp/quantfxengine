@@ -8,3 +8,6 @@ sourcemerc
 
 #ctags tagfile
 tags
+
+#python bytecode
+*.pyc
