@@ -77,7 +77,7 @@ class StreamingPricesFromFile(object):
             f=open(self.csv_file, 'rb')
             f.close()
         except Exception as e:
-            print("Caught exception when opening backtesting file\n" + str(e))
+            print("Caught exception while opening backtesting file\n" + str(e))
             return
 
         #open file and read from it
@@ -98,7 +98,7 @@ class StreamingPricesFromFile(object):
                 time.sleep(.05)
                 #do not flood the queue
         except Exception as e:
-            print("Caught exception when reading from backtesting file\n" + str(e))
+            print("Caught exception while reading from backtesting file\n" + str(e))
             return
         finally:
             file.close()
