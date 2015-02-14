@@ -12,13 +12,15 @@ class StreamingForexPrices(object):
     """
     def __init__(
         self, domain, access_token,
-        account_id, instruments, events_queue
+        account_id, instruments, events_queue,
+        stoprequest
     ):
         self.domain = domain
         self.access_token = access_token
         self.account_id = account_id
         self.instruments = instruments
         self.events_queue = events_queue
+        self.stoprequest = stoprequest
 
     def connect_to_stream(self):
         try:
@@ -39,6 +41,9 @@ class StreamingForexPrices(object):
         if response.status_code != 200:
             return
         for line in response.iter_lines(1):
+            # check if we have received a stoprequest
+            if self.stoprequest.isSet():
+                break
             if line:
                 try:
                     msg = json.loads(line)
@@ -61,13 +66,17 @@ class StreamingPricesFromFile(object):
     The csv-file has to be in the form
     instrument,timestamp,bid,ask
     """
-    def __init__(self, csv_file, events_queue):
+    def __init__(self, csv_file, events_queue, stoprequest):
         self.csv_file=csv_file
         self.events_queue = events_queue
+        self.stoprequest = stoprequest
 
     def stream_to_queue(self):
         file=open(self.csv_file, 'rb')
         for row in csv.reader(file ,delimiter=','):
+            # check if we have received a stoprequest
+            if self.stoprequest.isSet():
+                break
             instrument, timestamp, bid, ask = row
             print("instrument = "+str(instrument)+" "
                 "timestamp = "+str(timestamp)+" "

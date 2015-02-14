@@ -8,13 +8,13 @@ from strategy import TestRandomStrategy
 from streaming import StreamingForexPrices, StreamingPricesFromFile
 
 
-def trade(events, strategy, execution):
+def trade(events, strategy, execution, stoprequest):
     """
     Carries out an infinite while loop that polls the
     events queue and directs each event to either the
     strategy component of the execution handler.
     """
-    while True:
+    while not stoprequest.isSet():
         try:
             event = events.get(True,0.5)
             #block and wait a half second if queue is empty
@@ -27,11 +27,13 @@ def trade(events, strategy, execution):
                 elif event.type == 'ORDER':
                     print "Executing order!"
                     execution.execute_order(event)
+    #TODO: write code to cancel all positions
 
 
 if __name__ == "__main__":
     heartbeat = 0.5    # Half a second between polling
-    events = Queue.Queue()
+    events = Queue.Queue() # Queue for communication between threads
+    stoprequest = threading.Event() # For stopping the threads
 
     # Trade 10000 units of EUR/USD
     instrument = "EUR_USD"
@@ -40,7 +42,7 @@ if __name__ == "__main__":
     if BACKTEST:
         # Create the price streaming class
         prices = StreamingPricesFromFile(
-            BACKTESTFILE, events
+            BACKTESTFILE, events, stoprequest
         )
         # Create the mock execution handler
         execution = MockExecution()
@@ -61,9 +63,18 @@ if __name__ == "__main__":
 
     # Create two separate threads: One for the trading loop
     # and another for the market price streaming class
-    trade_thread = threading.Thread(target=trade, args=(events, strategy, execution))
+    trade_thread = threading.Thread(target=trade, args=(events, strategy, execution, stoprequest))
     price_thread = threading.Thread(target=prices.stream_to_queue, args=[])
 
     # Start both threads
     trade_thread.start()
     price_thread.start()
+
+    # say to the threads if i have pressed ctrl+c
+    try:
+        while trade_thread.is_alive():
+            trade_thread.join(10)
+    except (KeyboardInterrupt, SystemExit):
+        print("Sending stop request to threads")
+        stoprequest.set()
+        print("Waiting for threads to terminate")
