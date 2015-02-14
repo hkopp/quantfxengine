@@ -1,6 +1,6 @@
 import random
 
-from event import OrderEvent
+from quantfxengine.event.event import OrderEvent
 
 
 class TestRandomStrategy(object):

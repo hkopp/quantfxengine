@@ -3,7 +3,7 @@ import json
 import csv
 import time
 
-from event import TickEvent
+from quantfxengine.event.event import TickEvent
 
 
 class StreamingForexPrices(object):

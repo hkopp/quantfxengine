@@ -2,10 +2,10 @@ import Queue
 import threading
 import time
 
-from execution import Execution, MockExecution
-from settings import STREAM_DOMAIN, API_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID, BACKTEST, BACKTESTFILE
-from strategy import TestRandomStrategy
-from streaming import StreamingForexPrices, StreamingPricesFromFile
+from quantfxengine.execution.execution import Execution, MockExecution
+from quantfxengine.settings import STREAM_DOMAIN, API_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID, BACKTEST, BACKTESTFILE
+from quantfxengine.strategy.strategy import TestRandomStrategy
+from quantfxengine.streaming.streaming import StreamingForexPrices, StreamingPricesFromFile
 
 
 def trade(events, strategy, execution, stoprequest):
