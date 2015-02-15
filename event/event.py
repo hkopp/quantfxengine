@@ -5,6 +5,11 @@ class Event(object):
 class TickEvent(Event):
     """
     Events with prices
+        Attributes:
+        instrument: e.g. EUR_USD
+        time: timestamp from price
+        bid: Bid price
+        ask: Ask price
     """
     def __init__(self, instrument, time, bid, ask):
         self.type = 'TICK'
@@ -15,6 +20,14 @@ class TickEvent(Event):
 
 class SignalEvent(Event):
     def __init__(self, instrument, order_type, side):
+    """
+    Events for good trading opportunities if they fit in our risk
+    management
+    Attributes
+        instrument: e.g. EUR_USD
+        order_type: 'market' or 'limit'
+        side: 'buy' or 'sell'
+    """
         self.type = 'SIGNAL'
         self.instrument = instrument
         self.order_type = order_type
@@ -22,7 +35,12 @@ class SignalEvent(Event):
 
 class OrderEvent(Event):
     """
-    Events for buy or sell orders
+    Events for buy or sell orders which should be executed
+    Attributes:
+        instrument: e.g. "EUR_USD"
+        units: How much we want to buy/sell
+        order_type: 'market' or 'limit'
+        side: 'buy' or 'sell'
     """
     def __init__(self, instrument, units, order_type, side):
         self.type = 'ORDER'
