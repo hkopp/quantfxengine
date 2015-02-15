@@ -94,6 +94,8 @@ class StreamingPricesFromFile(object):
                 if self.stoprequest.isSet():
                     break
                 instrument, timestamp, bid, ask = row
+                bid = float(bid)
+                ask = float(ask)
                 self.cur_bid = bid
                 self.cur_ask = ask
                 print("instrument = "+str(instrument)+" "

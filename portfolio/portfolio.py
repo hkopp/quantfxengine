@@ -100,7 +100,7 @@ class Portfolio(object):
             # Check if the sides equal
             if side == ps.side:
                 # Add to the position
-                add_position_units(
+                self.add_position_units(
                     market, units, exposure,
                     add_price, remove_price
                 )
