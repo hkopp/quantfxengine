@@ -5,7 +5,7 @@ import os
 
 from quantfxengine.streaming.streaming import *
 
-class Test_StreamingForexPrices(object):
+class Test_StreamingForexPrices(unittest.TestCase):
     """
     Unit tests for the class StreamingForexPrices
     """
@@ -30,8 +30,8 @@ class Test_StreamingPricesFromFile(unittest.TestCase):
         self.assertIsInstance(event, TickEvent)
         self.assertEqual(event.instrument, 'EUR_USD')
         self.assertEqual(event.time, '2015-02-14T10:30:00.649678Z')
-        self.assertEqual(event.bid, '1.24029')
-        self.assertEqual(event.ask, '1.24042')
+        self.assertEqual(event.bid, 1.24029)
+        self.assertEqual(event.ask, 1.24042)
         stoprequest.set()
 
 if __name__ == '__main__':
