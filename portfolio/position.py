@@ -13,8 +13,6 @@ class Position(object):
         self.profit_perc = self.calculate_profit_perc()
 
     def calculate_pips(self):
-        print("HAAAAAAAA")
-        print("cur_price"+str(self.cur_price))
         mult = 1.0
         if self.side == "SHORT":
             mult = -1.0
