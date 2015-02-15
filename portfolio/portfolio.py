@@ -6,7 +6,7 @@ from quantfxengine.portfolio.position import Position
 
 class Portfolio(object):
     def __init__(
-        self, ticker, events, base="GBP", leverage=20, 
+        self, ticker, events, base="EUR", leverage=20,
         equity=100000.0, risk_per_trade=0.02
     ):
         self.ticker = ticker
