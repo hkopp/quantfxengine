@@ -19,7 +19,6 @@ class TickEvent(Event):
         self.ask = ask
 
 class SignalEvent(Event):
-    def __init__(self, instrument, order_type, side):
     """
     Events for good trading opportunities if they fit in our risk
     management
@@ -28,6 +27,7 @@ class SignalEvent(Event):
         order_type: 'market' or 'limit'
         side: 'buy' or 'sell'
     """
+    def __init__(self, instrument, order_type, side):
         self.type = 'SIGNAL'
         self.instrument = instrument
         self.order_type = order_type
