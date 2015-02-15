@@ -1,4 +1,14 @@
 class Position(object):
+    """
+    A position in a market
+    Attributes:
+        side: LONG or SHORT
+        market: e.g. EUR_USD
+        units: number of units of the currency
+        exposure: exposure
+        avg_price: average price for multiple purchases
+        cur_price: current price of the whole position
+    """
     def __init__(
         self, side, market, units, 
         exposure, avg_price, cur_price
