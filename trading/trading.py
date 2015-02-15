@@ -3,12 +3,13 @@ import threading
 import time
 
 from quantfxengine.execution.execution import Execution, MockExecution
+from quantfxengine.portfolio.portfolio import Portfolio
 from quantfxengine.settings import STREAM_DOMAIN, API_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID, BACKTEST, BACKTESTFILE
 from quantfxengine.strategy.strategy import TestRandomStrategy
 from quantfxengine.streaming.streaming import StreamingForexPrices, StreamingPricesFromFile
 
 
-def trade(events, strategy, execution, stoprequest):
+def trade(events, strategy, portfolio, execution, stoprequest):
     """
     Carries out an infinite while loop that polls the
     events queue and directs each event to either the
@@ -24,6 +25,8 @@ def trade(events, strategy, execution, stoprequest):
             if event is not None:
                 if event.type == 'TICK':
                     strategy.calculate_signals(event)
+                elif event.type == 'SIGNAL':
+                    portfolio.execute_signal(event)
                 elif event.type == 'ORDER':
                     print "Executing order!"
                     execution.execute_order(event)
@@ -51,7 +54,7 @@ if __name__ == "__main__":
         # making sure to provide authentication commands
         prices = StreamingForexPrices(
             STREAM_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID,
-            instrument, events
+            instrument, events, stoprequest
         )
         # Create the execution handler making sure to
         # provide authentication commands
@@ -59,12 +62,19 @@ if __name__ == "__main__":
 
     # Create the strategy/signal generator, passing the
     # instrument, quantity of units and the events queue
-    strategy = TestRandomStrategy(instrument, units, events)
+    strategy = TestRandomStrategy(instrument, events)
+
+    # Create the portfolio object that will be used to
+    # compare the OANDA positions with the local, to
+    # ensure backtesting integrity.
+    portfolio = Portfolio(prices, events, equity=100000.0)
 
     # Create two separate threads: One for the trading loop
     # and another for the market price streaming class
-    trade_thread = threading.Thread(target=trade, args=(events, strategy, execution, stoprequest))
-    price_thread = threading.Thread(target=prices.stream_to_queue, args=[])
+    trade_thread = threading.Thread(target=trade, args=(events,
+        strategy, portfolio, execution, stoprequest))
+    price_thread = threading.Thread(target=prices.stream_to_queue,
+        args=[])
 
     # Start both threads
     trade_thread.start()

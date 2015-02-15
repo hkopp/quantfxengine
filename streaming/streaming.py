@@ -21,6 +21,8 @@ class StreamingForexPrices(object):
         self.instruments = instruments
         self.events_queue = events_queue
         self.stoprequest = stoprequest
+        self.cur_bid = None
+        self.cur_ask = None
 
     def connect_to_stream(self):
         try:
@@ -56,6 +58,8 @@ class StreamingForexPrices(object):
                     time = msg["tick"]["time"]
                     bid = msg["tick"]["bid"]
                     ask = msg["tick"]["ask"]
+                    self.cur_bid = bid
+                    self.cur_ask = ask
                     tev = TickEvent(instrument, time, bid, ask)
                     self.events_queue.put(tev)
 
@@ -69,6 +73,8 @@ class StreamingPricesFromFile(object):
     def __init__(self, csv_file, events_queue, stoprequest):
         self.csv_file=csv_file
         self.events_queue = events_queue
+        self.cur_bid = None
+        self.cur_ask = None
         self.stoprequest = stoprequest
 
     def stream_to_queue(self):
@@ -88,6 +94,8 @@ class StreamingPricesFromFile(object):
                 if self.stoprequest.isSet():
                     break
                 instrument, timestamp, bid, ask = row
+                self.cur_bid = bid
+                self.cur_ask = ask
                 print("instrument = "+str(instrument)+" "
                     "timestamp = "+str(timestamp)+" "
                     "bid = "+str(bid)+" "
