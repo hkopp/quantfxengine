@@ -26,6 +26,10 @@ class Test_StreamingPricesFromFile(unittest.TestCase):
         #reference the relative path
         Stream=StreamingPricesFromFile(filename,events,stoprequest)
         Stream.stream_to_queue()
+        #test if attributes of Stream are correct
+        self.assertEqual(Stream.cur_bid,1.24029)
+        self.assertEqual(Stream.cur_ask,1.24042)
+        #test if the event is correct
         event=events.get()
         self.assertIsInstance(event, TickEvent)
         self.assertEqual(event.instrument, 'EUR_USD')
