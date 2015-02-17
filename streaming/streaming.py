@@ -5,8 +5,31 @@ import time
 
 from quantfxengine.event.event import TickEvent
 
+class AbstractPriceStream(object):
+    """
+    This is an abstract class to provide an interface for Streaming
+    Prices.
+    For creation we need a Queue.Queue() of events and a request to
+    stop threading.Event()
+    Attributes:
+        cur_bid: the current bid price
+        cur_ask: the current ask price
+        stream_to_queue(): which throws price events into the queue
+            of events
+    """
+    def __init__(
+        self, events_queue, stoprequest
+    ):
+        self.events_queue = events_queue
+        self.stoprequest = stoprequest
+        self.cur_bid = None
+        self.cur_ask = None
 
-class StreamingForexPrices(object):
+    def stream_to_queue(self):
+        raise NotImplementedError()
+
+
+class StreamingForexPrices(AbstractPriceStream):
     """
     A class to connect to the broker and stream prices
     """
@@ -64,7 +87,7 @@ class StreamingForexPrices(object):
                     self.events_queue.put(tev)
 
 
-class StreamingPricesFromFile(object):
+class StreamingPricesFromFile(AbstractPriceStream):
     """
     A class for reading in csv-files and backtesting.
     The csv-file has to be in the form
