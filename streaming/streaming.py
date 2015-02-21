@@ -135,3 +135,24 @@ class StreamingPricesFromFile(AbstractPriceStream):
             return
         finally:
             file.close()
+
+
+class MockPriceStream(AbstractPriceStream):
+    """
+    This class is useful for unittesting. It mocks a stream of prices.
+    newprice(new_ask, new_bid) sets a new price stream_to_queue()
+    pushes this new price into the event_queue
+    """
+    def __init__(self, events_queue, stoprequest):
+        self.events_queue = events_queue
+        self.stoprequest = stoprequest
+        self.cur_bid = None
+        self.cur_ask = None
+
+    def newprice(self, new_ask, new_bid):
+        self.cur_bid=new_bid
+        self.cur_ask=new_ask
+
+    def stream_to_queue(self):
+        tev = TickEvent("EUR_USD", time, bid, ask)
+        self.events_queue.put(tev)
