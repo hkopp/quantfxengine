@@ -5,6 +5,19 @@ from quantfxengine.portfolio.position import Position
 
 
 class Portfolio(object):
+    """
+    This class models a portfolio
+    Attributes:
+        ticker: An AbstractPriceStream
+        events: Queue for communication
+        base: Base currency
+        leverage: leverage
+        equity: equity
+        balance: balance
+        risk_per_trade: risk we want to have per trade
+        trade_units: how much units we trade
+        positions: a dictionary of positions
+    """
     def __init__(
         self, ticker, events, base="EUR", leverage=20,
         equity=100000.0, risk_per_trade=0.02
