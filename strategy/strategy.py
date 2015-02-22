@@ -8,6 +8,7 @@ class TestRandomStrategy(object):
         self.instrument = instrument
         self.events = events
         self.ticks = 0
+        random.seed(5)
 
     def calculate_signals(self, event):
         if event.type == 'TICK':
