@@ -11,9 +11,9 @@ from quantfxengine.streaming.streaming import StreamingForexPrices, StreamingPri
 
 def trade(events, strategy, portfolio, execution, stoprequest):
     """
-    Carries out an infinite while loop that polls the
-    events queue and directs each event to either the
-    strategy component of the execution handler.
+    Carries out an infinite while loop that polls the events queue and
+    directs each event to either the strategy component, the execution
+    handler or the portfolio.
     """
     while not stoprequest.isSet():
         try:
