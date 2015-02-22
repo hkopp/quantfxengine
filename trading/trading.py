@@ -26,6 +26,7 @@ def trade(events, strategy, portfolio, execution, stoprequest):
                 if event.type == 'TICK':
                     strategy.calculate_signals(event)
                 elif event.type == 'SIGNAL':
+                    print("recv new order signal:", event.side)
                     portfolio.execute_signal(event)
                 elif event.type == 'ORDER':
                     print "Executing order!"

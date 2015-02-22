@@ -25,7 +25,7 @@ class SignalEvent(Event):
     Attributes
         instrument: e.g. EUR_USD
         order_type: 'market' or 'limit'
-        side: 'buy' or 'sell'
+        side: 'LONG' or 'SHORT'
     """
     def __init__(self, instrument, order_type, side):
         self.type = 'SIGNAL'
@@ -40,7 +40,7 @@ class OrderEvent(Event):
         instrument: e.g. "EUR_USD"
         units: How much we want to buy/sell
         order_type: 'market' or 'limit'
-        side: 'buy' or 'sell'
+        side: 'LONG' or 'SHORT'
     """
     def __init__(self, instrument, units, order_type, side):
         self.type = 'ORDER'

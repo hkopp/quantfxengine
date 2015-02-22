@@ -105,7 +105,7 @@ class Portfolio(object):
                 side, market, units, exposure,
                 add_price, remove_price
             )
-            order = OrderEvent(market, units, "market", "buy")
+            order = OrderEvent(market, units, "market", side)
             self.events.put(order)
         # If a position exists add or remove units
         else:
@@ -117,31 +117,37 @@ class Portfolio(object):
                     market, units, exposure,
                     add_price, remove_price
                 )
+                order = OrderEvent(market, units, "market", side)
+                self.events.put(order)
             else:
                 # Check if the units close out the position
                 if units == ps.units:
                     # Close the position
                     self.close_position(market, remove_price)
-                    order = OrderEvent(market, units, "market", "sell")
+                    order = OrderEvent(market, units, "market", side)
                     self.events.put(order)
                 elif units < ps.units:
                     # Remove from the position
                     self.remove_position_units(
                         market, units, remove_price
                     )
+                    order = OrderEvent(market, units, "market", ps.side)
+                    self.events.put(order)
                 else: # units > ps.units
                     # Close the position and add a new one with
                     # additional units of opposite side
                     new_units = units - ps.units
                     self.close_position(market, remove_price)
                     
-                    if side == "buy":
-                        new_side = "sell"
+                    if side == "LONG":
+                        new_side = "SHORT"
                     else:
-                        new_side = "sell"
+                        new_side = "SHORT"
                     new_exposure = float(units)
                     self.add_new_position(
                         new_side, market, new_units, 
                         new_exposure, add_price, remove_price
                     )
+                    order = OrderEvent(market, units, "market", new_side)
+                    self.events.put(order)
         print "Balance: %0.2f" % self.balance
