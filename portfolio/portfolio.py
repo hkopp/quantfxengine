@@ -105,6 +105,11 @@ class Portfolio(object):
             del[self.positions[market]]
             return True
 
+    def close_all_positions(self):
+        for market in self.positions.keys():
+            remove_price = self.ticker.cur_bid
+            self.close_position(market, remove_price)
+
     def execute_signal(self, signal_event):
         side = signal_event.side
         market = signal_event.instrument

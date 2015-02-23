@@ -31,8 +31,8 @@ def trade(events, strategy, portfolio, execution, stoprequest):
                 elif event.type == 'ORDER':
                     print "Executing order!"
                     execution.execute_order(event)
-    #TODO: write code to cancel all positions
-
+    print "Closing all positions"
+    portfolio.close_all_positions()
 
 if __name__ == "__main__":
     heartbeat = 0.5    # Half a second between polling
