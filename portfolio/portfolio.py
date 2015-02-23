@@ -100,7 +100,7 @@ class Portfolio(object):
                 order_side = 'SHORT'
             else:
                 order_side = 'LONG'
-            order = OrderEvent(market, units, "market", order_side)
+            order = OrderEvent(market, ps.units, "market", order_side)
             self.events.put(order)
             del[self.positions[market]]
             return True
