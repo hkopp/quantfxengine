@@ -4,8 +4,7 @@ from quantfxengine.event.event import SignalEvent
 
 
 class TestRandomStrategy(object):
-    def __init__(self, instrument, events):
-        self.instrument = instrument
+    def __init__(self, events):
         self.events = events
         self.ticks = 0
         random.seed(5)
@@ -16,6 +15,6 @@ class TestRandomStrategy(object):
             if self.ticks % 5 == 0:
                 side = random.choice(["LONG", "SHORT"])
                 order = SignalEvent(
-                    self.instrument, "market", side
+                    event.instrument, "market", side
                 )
                 self.events.put(order)

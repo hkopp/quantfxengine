@@ -5,6 +5,21 @@ import time
 
 from quantfxengine.event.event import TickEvent
 
+class MarketState(object):
+    """
+    This class models the state of an instrument in the market
+    Attributes:
+        bid: bid price
+        ask: bid price
+    """
+    def __init__(self,bid,ask):
+        self.bid=bid
+        self.ask=ask
+
+    def update_bid_ask(self,new_bid,new_ask):
+        self.bid=new_bid
+        self.ask=new_ask
+
 class AbstractPriceStream(object):
     """
     This is an abstract class to provide an interface for Streaming
@@ -12,8 +27,9 @@ class AbstractPriceStream(object):
     For creation we need a Queue.Queue() of events and a request to
     stop threading.Event()
     Attributes:
-        cur_bid: the current bid price
-        cur_ask: the current ask price
+        cur_prices: a hashlist, indexed by instruments
+            where each entry is a marketstate(hopefully the current
+            one)
         stream_to_queue(): which throws price events into the queue
             of events
     """
@@ -22,8 +38,7 @@ class AbstractPriceStream(object):
     ):
         self.events_queue = events_queue
         self.stoprequest = stoprequest
-        self.cur_bid = None
-        self.cur_ask = None
+        self.cur_prices = {}
 
     def stream_to_queue(self):
         raise NotImplementedError()
@@ -44,15 +59,20 @@ class StreamingForexPrices(AbstractPriceStream):
         self.instruments = instruments
         self.events_queue = events_queue
         self.stoprequest = stoprequest
-        self.cur_bid = None
-        self.cur_ask = None
+        #set up current market state per instrument
+        self.cur_prices = {}
+        for instr in instruments:
+            self.cur_prices[instr]=MarketState(None,None)
 
     def connect_to_stream(self):
         try:
             s = requests.Session()
             url = "https://" + self.domain + "/v1/prices"
-            headers = {'Authorization' : 'Bearer ' + self.access_token}
-            params = {'instruments' : self.instruments, 'accountId' : self.account_id}
+            headers = {'Authorization' : 'Bearer ' + str(self.access_token)}
+            params = {'instruments' : ','.join(self.instruments), 'accountId' : self.account_id}
+            #TODO: not sure if this really works
+            #broker is currently
+            #down for maintenance, so I cannot test
             req = requests.Request('GET', url, headers=headers, params=params)
             pre = req.prepare()
             resp = s.send(pre, stream=True, verify=False)
@@ -81,8 +101,7 @@ class StreamingForexPrices(AbstractPriceStream):
                     time = msg["tick"]["time"]
                     bid = msg["tick"]["bid"]
                     ask = msg["tick"]["ask"]
-                    self.cur_bid = bid
-                    self.cur_ask = ask
+                    self.cur_prices[instrument].update_bid_ask(bid,ask)
                     tev = TickEvent(instrument, time, bid, ask)
                     self.events_queue.put(tev)
 
@@ -96,8 +115,7 @@ class StreamingPricesFromFile(AbstractPriceStream):
     def __init__(self, csv_file, events_queue, stoprequest):
         self.csv_file=csv_file
         self.events_queue = events_queue
-        self.cur_bid = None
-        self.cur_ask = None
+        self.cur_prices = {}
         self.stoprequest = stoprequest
 
     def stream_to_queue(self):
@@ -117,10 +135,13 @@ class StreamingPricesFromFile(AbstractPriceStream):
                 if self.stoprequest.isSet():
                     break
                 instrument, timestamp, bid, ask = row
+                #update cur_prices if it exists for this instrument, else create it
                 bid = float(bid)
                 ask = float(ask)
-                self.cur_bid = bid
-                self.cur_ask = ask
+                if instrument in self.cur_prices:
+                    self.cur_prices[instrument].update_bid_ask(bid,ask)
+                else:
+                    self.cur_prices[instrument] = MarketState(bid,ask)
                 print("instrument = "+str(instrument)+" "
                     "timestamp = "+str(timestamp)+" "
                     "bid = "+str(bid)+" "
@@ -146,12 +167,10 @@ class MockPriceStream(AbstractPriceStream):
     def __init__(self, events_queue, stoprequest):
         self.events_queue = events_queue
         self.stoprequest = stoprequest
-        self.cur_bid = None
-        self.cur_ask = None
+        self.cur_prices = {"EUR_USD" : MarketState(None,None)}
 
     def newprice(self, new_ask, new_bid):
-        self.cur_bid=new_bid
-        self.cur_ask=new_ask
+        self.cur_prices["EUR_USD"].update_bid_ask(new_bid, new_ask)
 
     def stream_to_queue(self):
         tev = TickEvent("EUR_USD", time, bid, ask)

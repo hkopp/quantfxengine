@@ -107,7 +107,7 @@ class Portfolio(object):
 
     def close_all_positions(self):
         for market in self.positions.keys():
-            remove_price = self.ticker.cur_bid
+            remove_price = self.ticker.cur_prices[market].bid
             self.close_position(market, remove_price)
 
     def execute_signal(self, signal_event):
@@ -116,8 +116,8 @@ class Portfolio(object):
         units = int(self.trade_units)
 
         # Check side for correct bid/ask prices
-        add_price = self.ticker.cur_ask
-        remove_price = self.ticker.cur_bid
+        add_price = self.ticker.cur_prices[market].ask
+        remove_price = self.ticker.cur_prices[market].bid
         exposure = float(units)
 
         # If there is no position, create one

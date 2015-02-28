@@ -27,8 +27,8 @@ class Test_StreamingPricesFromFile(unittest.TestCase):
         Stream=StreamingPricesFromFile(filename,events,stoprequest)
         Stream.stream_to_queue()
         #test if attributes of Stream are correct
-        self.assertEqual(Stream.cur_bid,1.24029)
-        self.assertEqual(Stream.cur_ask,1.24042)
+        self.assertEqual(Stream.cur_prices["EUR_USD"].bid,1.24029)
+        self.assertEqual(Stream.cur_prices["EUR_USD"].ask,1.24042)
         #test if the event is correct
         event=events.get()
         self.assertIsInstance(event, TickEvent)

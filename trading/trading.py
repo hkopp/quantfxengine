@@ -26,7 +26,8 @@ def trade(events, strategy, portfolio, execution, stoprequest):
                 if event.type == 'TICK':
                     strategy.calculate_signals(event)
                 elif event.type == 'SIGNAL':
-                    print("recv new order signal:", event.side)
+                    print("recv new order signal:", event.side,
+                            event.instrument)
                     portfolio.execute_signal(event)
                 elif event.type == 'ORDER':
                     print "Executing order!"
@@ -40,7 +41,7 @@ if __name__ == "__main__":
     stoprequest = threading.Event() # For stopping the threads
 
     # Trade 10000 units of EUR/USD
-    instrument = "EUR_USD"
+    instruments = ["EUR_USD","EUR_CHF"]
     units = 10000
 
     if BACKTEST:
@@ -55,7 +56,7 @@ if __name__ == "__main__":
         # making sure to provide authentication commands
         prices = StreamingForexPrices(
             STREAM_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID,
-            instrument, events, stoprequest
+            instruments, events, stoprequest
         )
         # Create the execution handler making sure to
         # provide authentication commands
@@ -63,7 +64,7 @@ if __name__ == "__main__":
 
     # Create the strategy/signal generator, passing the
     # instrument, quantity of units and the events queue
-    strategy = TestRandomStrategy(instrument, events)
+    strategy = TestRandomStrategy(events)
 
     # Create the portfolio object that will be used to
     # compare the OANDA positions with the local, to
