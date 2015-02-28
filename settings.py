@@ -22,3 +22,8 @@ ACCOUNT_ID = os.environ.get('OANDA_API_ACCOUNT_ID', None)
 #Backtesting on a file
 BACKTEST = True
 BACKTESTFILE = 'test.csv'
+
+#Instruments
+INSTRUMENTS = ["EUR_USD","EUR_CHF"]
+#Units to track in Portfolio,i.e., size of account
+UNITS = 10000

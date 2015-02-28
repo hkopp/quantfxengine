@@ -4,7 +4,7 @@ import time
 
 from quantfxengine.execution.execution import Execution, MockExecution
 from quantfxengine.portfolio.portfolio import Portfolio
-from quantfxengine.settings import STREAM_DOMAIN, API_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID, BACKTEST, BACKTESTFILE
+from quantfxengine.settings import *
 from quantfxengine.strategy.strategy import TestRandomStrategy
 from quantfxengine.streaming.streaming import StreamingForexPrices, StreamingPricesFromFile
 
@@ -36,13 +36,12 @@ def trade(events, strategy, portfolio, execution, stoprequest):
     portfolio.close_all_positions()
 
 if __name__ == "__main__":
-    heartbeat = 0.5    # Half a second between polling
     events = Queue.Queue() # Queue for communication between threads
     stoprequest = threading.Event() # For stopping the threads
 
-    # Trade 10000 units of EUR/USD
-    instruments = ["EUR_USD","EUR_CHF"]
-    units = 10000
+    # Trade UNITS units of INSTRUMENTS
+    instruments = INSTRUMENTS
+    units = UNITS
 
     if BACKTEST:
         # Create the price streaming class
@@ -69,7 +68,7 @@ if __name__ == "__main__":
     # Create the portfolio object that will be used to
     # compare the OANDA positions with the local, to
     # ensure backtesting integrity.
-    portfolio = Portfolio(prices, events, equity=100000.0)
+    portfolio = Portfolio(prices, events, equity=units)
 
     # Create two separate threads: One for the trading loop
     # and another for the market price streaming class
