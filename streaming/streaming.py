@@ -2,6 +2,7 @@ import requests
 import json
 import csv
 import time
+from abc import ABCMeta, abstractmethod #abstract base classes
 
 from quantfxengine.event.event import TickEvent
 
@@ -33,6 +34,9 @@ class AbstractPriceStream(object):
         stream_to_queue(): which throws price events into the queue
             of events
     """
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
     def __init__(
         self, events_queue, stoprequest
     ):
@@ -40,6 +44,7 @@ class AbstractPriceStream(object):
         self.stoprequest = stoprequest
         self.cur_prices = {}
 
+    @abstractmethod
     def stream_to_queue(self):
         raise NotImplementedError()
 
