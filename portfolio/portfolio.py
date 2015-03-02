@@ -33,7 +33,7 @@ class Portfolio(object):
         self.positions = {}
 
     def calc_risk_position_size(self):
-        return self.equity * self.risk_per_trade
+        return self.equity * self.risk_per_trade / self.leverage
 
     def add_new_position(
         self, side, market, units, exposure,
@@ -118,7 +118,7 @@ class Portfolio(object):
         # Check side for correct bid/ask prices
         add_price = self.ticker.cur_prices[market].ask
         remove_price = self.ticker.cur_prices[market].bid
-        exposure = float(units)
+        exposure = float(units) * self.leverage
 
         # If there is no position, create one
         if market not in self.positions:
