@@ -160,7 +160,7 @@ class MockPriceStream(AbstractPriceStream):
         self.stoprequest = stoprequest
         self.cur_prices = {"EUR_USD" : MarketState(None,None)}
 
-    def newprice(self, new_ask, new_bid):
+    def newprice(self, new_bid, new_ask):
         self.cur_prices["EUR_USD"].update_bid_ask(new_bid, new_ask)
 
     def stream_to_queue(self):

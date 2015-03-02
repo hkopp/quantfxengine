@@ -1,8 +1,10 @@
 import unittest
 import Queue
+import threading
+
 from quantfxengine.portfolio.portfolio import Portfolio
 from quantfxengine.streaming.streaming import MockPriceStream
-import threading
+from quantfxengine.event.event import SignalEvent
 
 class Test_Portfolio(unittest.TestCase):
     """
@@ -14,7 +16,7 @@ class Test_Portfolio(unittest.TestCase):
         stoprequest=threading.Event()
         self.ticker=MockPriceStream(self.price_events,stoprequest)
         #bid=3, ask=4
-#        self.ticker.newprice(3,4)
+        self.ticker.newprice(3,4)
 #        self.ticker.stream_to_queue()
         self.pf=Portfolio(
                 self.ticker, self.order_events,"EUR",
@@ -63,8 +65,68 @@ class Test_Portfolio(unittest.TestCase):
         self.pf.close_position("EUR_USD", 2)
         self.assertEqual(self.pf.balance, 9500)
 
-    def test_execute_signal(self):
-        raise NotImplementedError
+    def test_execute_signal_new_position(self):
+        buyevent = SignalEvent("EUR_USD",'market','LONG')
+        self.pf.execute_signal(buyevent)
+        self.assertEqual(self.pf.positions["EUR_USD"].side, 'LONG')
+        self.assertEqual(self.pf.positions["EUR_USD"].market, 'EUR_USD')
+        self.assertEqual(self.pf.positions["EUR_USD"].units, 200)
+        self.assertEqual(self.pf.positions["EUR_USD"].exposure, 200)
+        self.assertEqual(self.pf.positions["EUR_USD"].avg_price, 4)
+        self.assertEqual(self.pf.positions["EUR_USD"].cur_price, 3)
+        #Portfolio with leverage
+        self.leverage_pf.execute_signal(buyevent)
+        self.assertEqual(self.leverage_pf.positions["EUR_USD"].side, 'LONG')
+        self.assertEqual(self.leverage_pf.positions["EUR_USD"].market, 'EUR_USD')
+        self.assertEqual(self.leverage_pf.positions["EUR_USD"].units, 10)
+        self.assertEqual(self.leverage_pf.positions["EUR_USD"].exposure, 200)
+        self.assertEqual(self.leverage_pf.positions["EUR_USD"].avg_price, 4)
+        self.assertEqual(self.leverage_pf.positions["EUR_USD"].cur_price, 3)
+
+    def test_execute_signal_add_to_position(self):
+        buyevent = SignalEvent("EUR_USD",'market','LONG')
+        self.pf.execute_signal(buyevent)
+        buyevent = SignalEvent("EUR_USD",'market','LONG')
+        self.pf.execute_signal(buyevent)
+        self.assertEqual(self.pf.positions["EUR_USD"].side, 'LONG')
+        self.assertEqual(self.pf.positions["EUR_USD"].market, 'EUR_USD')
+        self.assertEqual(self.pf.positions["EUR_USD"].units, 400)
+        self.assertEqual(self.pf.positions["EUR_USD"].exposure, 400)
+
+    def test_execute_signal_remove_from_position(self):
+        self.ticker.newprice(2,4)
+        buyevent = SignalEvent("EUR_USD",'market','LONG')
+        self.pf.execute_signal(buyevent)
+        self.pf.execute_signal(buyevent)
+        sellevent = SignalEvent("EUR_USD",'market','SHORT')
+        self.pf.execute_signal(sellevent)
+        self.assertEqual(self.pf.positions["EUR_USD"].side, 'LONG')
+        self.assertEqual(self.pf.positions["EUR_USD"].market, 'EUR_USD')
+        self.assertEqual(self.pf.positions["EUR_USD"].units, 200)
+        self.assertEqual(self.pf.positions["EUR_USD"].exposure, 200)
+        self.assertEqual(self.pf.balance, 9800)
+
+    def test_execute_signal_remove_position(self):
+        buyevent = SignalEvent("EUR_USD",'market','LONG')
+        self.pf.execute_signal(buyevent)
+        self.ticker.newprice(4,5)
+        sellevent = SignalEvent("EUR_USD",'market','SHORT')
+        self.pf.execute_signal(sellevent)
+        self.assertNotIn('EUR_USD', self.pf.positions.keys())
+
+    def test_execute_signal_invert_position(self):
+        self.ticker.newprice(2,4)
+        buyevent = SignalEvent("EUR_USD",'market','LONG')
+        self.pf.execute_signal(buyevent)
+        sellevent = SignalEvent("EUR_USD",'market','SHORT')
+        self.pf.execute_signal(sellevent)
+        self.pf.execute_signal(sellevent)
+        self.assertEqual(self.pf.positions["EUR_USD"].side, 'SHORT')
+        self.assertEqual(self.pf.positions["EUR_USD"].market, 'EUR_USD')
+        self.assertEqual(self.pf.positions["EUR_USD"].units, 200)
+        self.assertEqual(self.pf.positions["EUR_USD"].exposure, 200)
+        self.assertEqual(self.pf.balance, 9800)
+
 
 if __name__ == 'main':
     unittest.main()
