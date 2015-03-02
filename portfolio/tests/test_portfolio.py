@@ -18,6 +18,9 @@ class Test_Portfolio(unittest.TestCase):
 #        self.ticker.stream_to_queue()
         self.pf=Portfolio(
                 self.ticker, self.order_events,"EUR",
+                1, 10000, 0.02)
+        self.leverage_pf=Portfolio(
+                self.ticker, self.order_events,"EUR",
                 20, 10000, 0.02)
 
     def test_correct_init(self):
@@ -26,6 +29,7 @@ class Test_Portfolio(unittest.TestCase):
 
     def test_risk_position_size(self):
         self.assertEqual(self.pf.calc_risk_position_size(), 200)
+        self.assertEqual(self.leverage_pf.calc_risk_position_size(), 10)
 
     def test_add_new_position(self):
         self.pf.add_new_position('LONG',"EUR_USD", 100, 500, 4, 3)
