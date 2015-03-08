@@ -67,7 +67,7 @@ class Test_Portfolio(unittest.TestCase):
 
     def test_execute_signal_new_position(self):
         buyevent = SignalEvent("EUR_USD",'market','LONG')
-        self.pf.execute_signal(buyevent)
+        self.pf.execute_signal_event(buyevent)
         self.assertEqual(self.pf.positions["EUR_USD"].side, 'LONG')
         self.assertEqual(self.pf.positions["EUR_USD"].market, 'EUR_USD')
         self.assertEqual(self.pf.positions["EUR_USD"].units, 200)
@@ -75,7 +75,7 @@ class Test_Portfolio(unittest.TestCase):
         self.assertEqual(self.pf.positions["EUR_USD"].avg_price, 4)
         self.assertEqual(self.pf.positions["EUR_USD"].cur_price, 3)
         #Portfolio with leverage
-        self.leverage_pf.execute_signal(buyevent)
+        self.leverage_pf.execute_signal_event(buyevent)
         self.assertEqual(self.leverage_pf.positions["EUR_USD"].side, 'LONG')
         self.assertEqual(self.leverage_pf.positions["EUR_USD"].market, 'EUR_USD')
         self.assertEqual(self.leverage_pf.positions["EUR_USD"].units, 10)
@@ -85,9 +85,9 @@ class Test_Portfolio(unittest.TestCase):
 
     def test_execute_signal_add_to_position(self):
         buyevent = SignalEvent("EUR_USD",'market','LONG')
-        self.pf.execute_signal(buyevent)
+        self.pf.execute_signal_event(buyevent)
         buyevent = SignalEvent("EUR_USD",'market','LONG')
-        self.pf.execute_signal(buyevent)
+        self.pf.execute_signal_event(buyevent)
         self.assertEqual(self.pf.positions["EUR_USD"].side, 'LONG')
         self.assertEqual(self.pf.positions["EUR_USD"].market, 'EUR_USD')
         self.assertEqual(self.pf.positions["EUR_USD"].units, 400)
@@ -96,10 +96,10 @@ class Test_Portfolio(unittest.TestCase):
     def test_execute_signal_remove_from_position(self):
         self.ticker.newprice(2,4)
         buyevent = SignalEvent("EUR_USD",'market','LONG')
-        self.pf.execute_signal(buyevent)
-        self.pf.execute_signal(buyevent)
+        self.pf.execute_signal_event(buyevent)
+        self.pf.execute_signal_event(buyevent)
         sellevent = SignalEvent("EUR_USD",'market','SHORT')
-        self.pf.execute_signal(sellevent)
+        self.pf.execute_signal_event(sellevent)
         self.assertEqual(self.pf.positions["EUR_USD"].side, 'LONG')
         self.assertEqual(self.pf.positions["EUR_USD"].market, 'EUR_USD')
         self.assertEqual(self.pf.positions["EUR_USD"].units, 200)
@@ -108,19 +108,19 @@ class Test_Portfolio(unittest.TestCase):
 
     def test_execute_signal_remove_position(self):
         buyevent = SignalEvent("EUR_USD",'market','LONG')
-        self.pf.execute_signal(buyevent)
+        self.pf.execute_signal_event(buyevent)
         self.ticker.newprice(4,5)
         sellevent = SignalEvent("EUR_USD",'market','SHORT')
-        self.pf.execute_signal(sellevent)
+        self.pf.execute_signal_event(sellevent)
         self.assertNotIn('EUR_USD', self.pf.positions.keys())
 
     def test_execute_signal_invert_position(self):
         self.ticker.newprice(2,4)
         buyevent = SignalEvent("EUR_USD",'market','LONG')
-        self.pf.execute_signal(buyevent)
+        self.pf.execute_signal_event(buyevent)
         sellevent = SignalEvent("EUR_USD",'market','SHORT')
-        self.pf.execute_signal(sellevent)
-        self.pf.execute_signal(sellevent)
+        self.pf.execute_signal_event(sellevent)
+        self.pf.execute_signal_event(sellevent)
         self.assertEqual(self.pf.positions["EUR_USD"].side, 'SHORT')
         self.assertEqual(self.pf.positions["EUR_USD"].market, 'EUR_USD')
         self.assertEqual(self.pf.positions["EUR_USD"].units, 200)
