@@ -25,11 +25,11 @@ def trade(events, strategy, portfolio, execution, stoprequest):
             if event is not None:
                 if event.type == 'TICK':
                     strategy.calculate_signals(event)
-                    portfolio.track_positions(event)
+                    portfolio.execute_tick_event(event)
                 elif event.type == 'SIGNAL':
                     print("recv new order signal:", event.side,
                             event.instrument)
-                    portfolio.execute_signal(event)
+                    portfolio.execute_signal_event(event)
                 elif event.type == 'ORDER':
                     print "Executing order!"
                     execution.execute_order(event)

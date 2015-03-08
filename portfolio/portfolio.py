@@ -11,18 +11,20 @@ class AbstractPortfolio(object):
     Methods:
         execute_signal(self, signal_event):
             Takes in a SignalEvent and perhaps outputs OrderEvents
-        track_positions(self, tick_event):
+        execute_tick_event(self, tick_event):
             Takes in a TickEvent and adjusts positions
     """
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def execute_signal(self,signal_event):
-        raise NotImplementedError("Need to implement execute_signal")
+    def execute_signal_event(self,signal_event):
+        raise NotImplementedError("Need to implement "\
+                "execute_signal_event")
 
     @abstractmethod
-    def track_positions(self,tick_event):
-        raise NotImplementedError("Need to implement track_positions")
+    def execute_tick_event(self,tick_event):
+        raise NotImplementedError("Need to implement "\
+                "execute_tick_event")
 
 class Portfolio(AbstractPortfolio):
     """
@@ -130,7 +132,7 @@ class Portfolio(AbstractPortfolio):
             remove_price = self.ticker.cur_prices[market].bid
             self.close_position(market, remove_price)
 
-    def execute_signal(self, signal_event):
+    def execute_signal_event(self, signal_event):
         side = signal_event.side
         market = signal_event.instrument
         units = int(self.trade_units)
@@ -183,10 +185,10 @@ class Portfolio(AbstractPortfolio):
                     )
         print "Balance: %0.2f" % self.balance
 
-    def track_positions(self,tick_event):
+    def execute_tick_event(self,tick_event):
         if tick_event.instrument in self.positions:
             pos=self.positions[tick_event.instrument]
             if pos.side == 'LONG':
-                pos.cur_price=pos.units*tick_event.bid
+                pos.update_position_price(pos.units*tick_event.bid)
             else:
-                pos.cur_price=pos.units*tick_event.ask
+                pos.update_position_price(pos.units*tick_event.ask)
