@@ -48,3 +48,19 @@ class OrderEvent(Event):
         self.units = units
         self.order_type = order_type
         self.side = side
+
+class FillEvent(Event):
+    """
+    This event signals that an order has been filled.
+    Attributes:
+        instrument: e.g. "EUR_USD"
+        units: How much we have bought/sold
+        side: 'LONG' or 'SHORT'
+        price: the price for which the instrument was bought/sold
+    """
+    def __init__(self, instrument, units, side, price):
+        self.type = 'FILL'
+        self.instrument = instrument
+        self.units = units
+        self.side = side
+        self.price = price
