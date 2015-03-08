@@ -1,10 +1,30 @@
 from copy import deepcopy
+from abc import ABCMeta, abstractmethod
 
 from quantfxengine.event.event import OrderEvent
 from quantfxengine.portfolio.position import Position
 
+class AbstractPortfolio(object):
+    """
+    This is an abstract portfolio to provide a common interface for
+    other risk management modules
+    Methods:
+        execute_signal(self, signal_event):
+            Takes in a SignalEvent and perhaps outputs OrderEvents
+        track_positions(self, tick_event):
+            Takes in a TickEvent and adjusts positions
+    """
+    __metaclass__ = ABCMeta
 
-class Portfolio(object):
+    @abstractmethod
+    def execute_signal(self,signal_event):
+        raise NotImplementedError("Need to implement execute_signal")
+
+    @abstractmethod
+    def track_positions(self,tick_event):
+        raise NotImplementedError("Need to implement track_positions")
+
+class Portfolio(AbstractPortfolio):
     """
     This class models a portfolio
     Attributes:
@@ -162,3 +182,11 @@ class Portfolio(object):
                         new_exposure, add_price, remove_price
                     )
         print "Balance: %0.2f" % self.balance
+
+    def track_positions(self,tick_event):
+        if tick_event.instrument in self.positions:
+            pos=self.positions[tick_event.instrument]
+            if pos.side == 'LONG':
+                pos.cur_price=pos.units*tick_event.bid
+            else:
+                pos.cur_price=pos.units*tick_event.ask
