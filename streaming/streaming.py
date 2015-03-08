@@ -35,7 +35,7 @@ class AbstractPriceStream(object):
         raise NotImplementedError()
 
 
-class StreamingForexPrices(AbstractPriceStream):
+class StreamingForexPrices_OANDA(AbstractPriceStream):
     """
     A class to connect to the broker and stream prices
     """

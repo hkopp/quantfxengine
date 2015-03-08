@@ -2,11 +2,11 @@ import Queue
 import threading
 import time
 
-from quantfxengine.execution.execution import Execution, MockExecution
+from quantfxengine.execution.execution import ExecutionAtOANDA, MockExecution
 from quantfxengine.portfolio.portfolio import Portfolio
 from quantfxengine.settings import *
 from quantfxengine.strategy.strategy import TestRandomStrategy
-from quantfxengine.streaming.streaming import StreamingForexPrices, StreamingPricesFromFile
+from quantfxengine.streaming.streaming import *
 
 
 def trade(events, strategy, portfolio, execution, stoprequest):
@@ -54,13 +54,13 @@ if __name__ == "__main__":
     else:
         # Create the OANDA market price streaming class
         # making sure to provide authentication commands
-        prices = StreamingForexPrices(
+        prices = StreamingForexPrices_OANDA(
             STREAM_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID,
             instruments, events, stoprequest
         )
         # Create the execution handler making sure to
         # provide authentication commands
-        execution = Execution(API_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID)
+        execution = ExecutionAtOANDA(API_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID)
 
     # Create the strategy/signal generator, passing the
     # instrument, quantity of units and the events queue

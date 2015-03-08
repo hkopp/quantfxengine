@@ -1,8 +1,21 @@
 import httplib
 import urllib
+from abc import ABCMeta, abstractmethod
 
+class AbstractExecution(object):
+    """
+    An abstract class to abstract execution for different Brokers.
+    Methods:
+        execute_order(order_event): takes an order_event and executes
+            it
+    """
+    __metaclass__ = ABCMeta
 
-class Execution(object):
+    @abstractmethod
+    def execute_order(self,order_event):
+        raise NotImplementedError("Need to implement execute_order!")
+
+class ExecutionAtOANDA(AbstractExecution):
     def __init__(self, domain, access_token, account_id):
         self.domain = domain
         self.access_token = access_token
@@ -12,16 +25,16 @@ class Execution(object):
     def obtain_connection(self):
         return httplib.HTTPSConnection(self.domain)
 
-    def execute_order(self, event):
+    def execute_order(self, order_event):
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
             "Authorization": "Bearer " + self.access_token
         }
         params = urllib.urlencode({
-            "instrument" : event.instrument,
-            "units" : event.units,
-            "type" : event.order_type,
-            "side" : event.side
+            "instrument" : order_event.instrument,
+            "units" : order_event.units,
+            "type" : order_event.order_type,
+            "side" : order_event.side
         })
         self.conn.request(
             "POST",
@@ -31,15 +44,15 @@ class Execution(object):
         response = self.conn.getresponse().read()
         print response
 
-class MockExecution(object):
+class MockExecution(AbstractExecution):
     """
     A mock execution object which does not trade externally
     Very useful for backtesting purposes
     """
-    def execute_order(self, event):
+    def execute_order(self, order_event):
         print("Would have executed: "
-                "instrument: "+ str(event.instrument)+
-                "units: "+ str(event.units)+
-                "type: "+ str(event.order_type)+
-                "side: "+ str(event.side)
+                "instrument: "+ str(order_event.instrument)+
+                "units: "+ str(order_event.units)+
+                "type: "+ str(order_event.order_type)+
+                "side: "+ str(order_event.side)
         )

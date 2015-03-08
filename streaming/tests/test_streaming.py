@@ -5,7 +5,7 @@ import os
 
 from quantfxengine.streaming.streaming import *
 
-class Test_StreamingForexPrices(unittest.TestCase):
+class Test_StreamingForexPrices_OANDA(unittest.TestCase):
     """
     Unit tests for the class StreamingForexPrices
     """
