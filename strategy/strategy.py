@@ -13,7 +13,7 @@ class TestRandomStrategy(object):
         if event.type == 'TICK':
             self.ticks += 1
             if self.ticks % 5 == 0:
-                side = random.choice(["LONG", "SHORT"])
+                side = random.choice(["buy", "sell"])
                 order = SignalEvent(
                     event.instrument, "market", side
                 )
