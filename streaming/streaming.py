@@ -61,12 +61,9 @@ class StreamingForexPrices_OANDA(AbstractPriceStream):
             url = "https://" + self.domain + "/v1/prices"
             headers = {'Authorization' : 'Bearer ' + str(self.access_token)}
             params = {'instruments' : ','.join(self.instruments), 'accountId' : self.account_id}
-            #TODO: not sure if this really works
-            #broker is currently
-            #down for maintenance, so I cannot test
             req = requests.Request('GET', url, headers=headers, params=params)
             pre = req.prepare()
-            resp = s.send(pre, stream=True, verify=False)
+            resp = s.send(pre, stream=True, verify=True)
             return resp
         except Exception as e:
             s.close()
@@ -79,6 +76,8 @@ class StreamingForexPrices_OANDA(AbstractPriceStream):
         for line in response.iter_lines(1):
             # check if we have received a stoprequest
             if self.stoprequest.isSet():
+                print("Closing Session")
+                response.close()
                 break
             if line:
                 try:
