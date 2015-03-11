@@ -1,7 +1,7 @@
 from copy import deepcopy
 from abc import ABCMeta, abstractmethod
 
-from quantfxengine.event.event import OrderEvent
+from quantfxengine.event.event import OrderEvent, FillEvent
 from quantfxengine.portfolio.position import Position
 
 class AbstractPortfolio(object):
@@ -25,6 +25,11 @@ class AbstractPortfolio(object):
     def execute_tick_event(self,tick_event):
         raise NotImplementedError("Need to implement "\
                 "execute_tick_event")
+
+    @abstractmethod
+    def execute_fill_event(self,fill_event):
+        raise NotImplementedError("Need to implement "\
+                "execute_fill_event")
 
 class Portfolio(AbstractPortfolio):
     """
@@ -66,8 +71,6 @@ class Portfolio(AbstractPortfolio):
             add_price, remove_price
         )
         self.positions[market] = ps
-        order = OrderEvent(market, units, "market", side)
-        self.events.put(order)
 
     def add_position_units(
         self, market, units, exposure, 
@@ -83,8 +86,6 @@ class Portfolio(AbstractPortfolio):
             ps.avg_price = new_total_cost/new_total_units
             ps.units = new_total_units
             ps.update_position_price(remove_price)
-            order = OrderEvent(market, units, "market", ps.side)
-            self.events.put(order)
             return True
 
     def remove_position_units(
@@ -100,12 +101,6 @@ class Portfolio(AbstractPortfolio):
             ps.update_position_price(remove_price)
             pnl = ps.calculate_pips() * exposure / remove_price 
             self.balance += pnl
-            if ps.side == 'LONG':
-                order_side = 'SHORT'
-            else:
-                order_side = 'LONG'
-            order = OrderEvent(market, units, "market", order_side)
-            self.events.put(order)
             return True
 
     def close_position(
@@ -118,12 +113,6 @@ class Portfolio(AbstractPortfolio):
             ps.update_position_price(remove_price)
             pnl = ps.calculate_pips() * ps.exposure / remove_price 
             self.balance += pnl
-            if ps.side == 'LONG':
-                order_side = 'SHORT'
-            else:
-                order_side = 'LONG'
-            order = OrderEvent(market, ps.units, "market", order_side)
-            self.events.put(order)
             del[self.positions[market]]
             return True
 
@@ -131,58 +120,15 @@ class Portfolio(AbstractPortfolio):
         for market in self.positions.keys():
             remove_price = self.ticker.cur_prices[market].bid
             self.close_position(market, remove_price)
+            #TODO: this also sends orders, the others do not
 
     def execute_signal_event(self, signal_event):
         side = signal_event.side
         market = signal_event.instrument
         units = int(self.trade_units)
 
-        # Check side for correct bid/ask prices
-        add_price = self.ticker.cur_prices[market].ask
-        remove_price = self.ticker.cur_prices[market].bid
-        exposure = float(units) * self.leverage
-
-        # If there is no position, create one
-        if market not in self.positions:
-            self.add_new_position(
-                side, market, units, exposure,
-                add_price, remove_price
-            )
-        # If a position exists add or remove units
-        else:
-            ps = self.positions[market]
-            # Check if the sides equal
-            if side == ps.side:
-                # Add to the position
-                self.add_position_units(
-                    market, units, exposure,
-                    add_price, remove_price
-                )
-            else:
-                # Check if the units close out the position
-                if units == ps.units:
-                    # Close the position
-                    self.close_position(market, remove_price)
-                elif units < ps.units:
-                    # Remove from the position
-                    self.remove_position_units(
-                        market, units, remove_price
-                    )
-                else: # units > ps.units
-                    # Close the position and add a new one with
-                    # additional units of opposite side
-                    new_units = units - ps.units
-                    self.close_position(market, remove_price)
-                    
-                    if side == "LONG":
-                        new_side = "SHORT"
-                    else:
-                        new_side = "SHORT"
-                    new_exposure = float(units)
-                    self.add_new_position(
-                        new_side, market, new_units, 
-                        new_exposure, add_price, remove_price
-                    )
+        order = OrderEvent(market, units, "market", side)
+        self.events.put(order)
         print "Balance: %0.2f" % self.balance
 
     def execute_tick_event(self,tick_event):
@@ -192,3 +138,74 @@ class Portfolio(AbstractPortfolio):
                 pos.update_position_price(pos.units*tick_event.bid)
             else:
                 pos.update_position_price(pos.units*tick_event.ask)
+
+    def execute_fill_event(self,fill_event):
+        side = fill_event.side
+        market = fill_event.instrument
+        units = fill_event.units
+        price = fill_event.price
+
+        # Check side for correct bid/ask prices
+        add_price = self.ticker.cur_prices[market].ask
+        remove_price = self.ticker.cur_prices[market].bid
+        exposure = float(units) * self.leverage
+
+        # If there is no position, create one
+        if market not in self.positions:
+            if side == "LONG":
+                self.add_new_position(
+                    side, market, units, exposure,
+                    price, remove_price
+                )
+            else:
+                self.add_new_position(
+                    "SHORT", market, units, exposure,
+                    price, add_price
+                )
+
+        # If a position exists add or remove units
+        else:
+            ps = self.positions[market]
+            # Check if the sides equal
+            if side == ps.side:
+                # Add to the position
+                if side == "LONG":
+                    self.add_position_units(
+                        market, units, exposure,
+                        price, remove_price
+                    )
+                else:
+                    self.add_position_units(
+                        market, units, exposure,
+                        price, add_price
+                    )
+            else:
+                # Check if the units close out the position
+                if units == ps.units:
+                    # Close the position
+                    self.close_position(market, price)
+                elif units < ps.units:
+                    # Remove from the position
+                    self.remove_position_units(
+                        market, units, price
+                    )
+                else: # units > ps.units
+                    # Close the position and add a new one with
+                    # additional units of opposite side
+                    new_units = units - ps.units
+                    self.close_position(market, price)
+                    
+                    new_exposure = float(new_units) * self.leverage
+                    if ps.side == "LONG":
+                        new_side = "SHORT"
+                        self.add_new_position(
+                            new_side, market, new_units, 
+                            new_exposure, price, add_price
+                        )
+                    else:
+                        new_side = "LONG"
+                        self.add_new_position(
+                            new_side, market, new_units, 
+                            new_exposure, price, remove_price
+                        )
+        print "Balance: %0.2f" % self.balance

@@ -33,6 +33,8 @@ def trade(events, strategy, portfolio, execution, stoprequest):
                 elif event.type == 'ORDER':
                     print "Executing order!"
                     execution.execute_order(event)
+                elif event.type == 'Fill':
+                    portfolio.execute_fill_order(event)
     print "Closing all positions"
     portfolio.close_all_positions()
 
