@@ -27,15 +27,13 @@ def trade(events, strategy, portfolio, execution, stoprequest):
                     strategy.calculate_signals(event)
                     portfolio.execute_tick_event(event)
                 elif event.type == 'SIGNAL':
-                    print("recv new order signal:", event.side,
-                            event.instrument)
+                    print("recv new order signal:", event)
                     portfolio.execute_signal_event(event)
                 elif event.type == 'ORDER':
                     print "Executing order!"
                     execution.execute_order(event)
                 elif event.type == 'FILL':
-                    print("recv new fill event:", event.side,
-                            event.units)
+                    print("recv new fill event:", event)
                     portfolio.execute_fill_event(event)
     #execute remaining events
     while not events.empty():

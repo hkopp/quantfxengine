@@ -98,12 +98,7 @@ class MockExecution(AbstractExecution):
         units = order_event.units
         order_type = order_event.order_type
         side = order_event.side
-        print("Would have executed: "
-                "instrument: "+ str(instrument)+
-                "units: "+ str(units)+
-                "type: "+ str(order_type)+
-                "side: "+ str(side)
-        )
+        print("Would have executed: ", order_event)
         if side == "buy":
             price = self.ticker.cur_prices[instrument].ask
             fevent = FillEvent(instrument, units, "LONG", price)
