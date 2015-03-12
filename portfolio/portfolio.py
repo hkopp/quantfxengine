@@ -1,3 +1,4 @@
+import logging
 from copy import deepcopy
 from abc import ABCMeta, abstractmethod
 
@@ -61,6 +62,7 @@ class Portfolio(AbstractPortfolio):
         self.risk_per_trade = risk_per_trade
         self.trade_units = self.calc_risk_position_size()
         self.positions = {}
+        self.logger = logging.getLogger(__name__)
 
     def calc_risk_position_size(self):
         return self.equity * self.risk_per_trade / self.leverage
@@ -140,7 +142,6 @@ class Portfolio(AbstractPortfolio):
 
         order = OrderEvent(market, units, "market", side)
         self.events.put(order)
-        print "Balance: %0.2f" % self.balance
 
     def execute_tick_event(self,tick_event):
         if tick_event.instrument in self.positions:
@@ -219,4 +220,4 @@ class Portfolio(AbstractPortfolio):
                             new_side, market, new_units, 
                             new_exposure, price, remove_price
                         )
-        print "Balance: %0.2f" % self.balance
+        self.logger.info("Balance: %0.2f" % self.balance)

@@ -2,6 +2,8 @@ import requests
 import json
 import csv
 import time
+import logging
+
 from abc import ABCMeta, abstractmethod #abstract base classes
 
 from quantfxengine.streaming.marketstate import MarketState
@@ -54,6 +56,7 @@ class StreamingForexPrices_OANDA(AbstractPriceStream):
         self.cur_prices = {}
         for instr in instruments:
             self.cur_prices[instr]=MarketState(None,None)
+        self.logger = logging.getLogger(__name__)
 
     def connect_to_stream(self):
         try:
@@ -67,7 +70,7 @@ class StreamingForexPrices_OANDA(AbstractPriceStream):
             return resp
         except Exception as e:
             s.close()
-            print "Caught exception when connecting to stream\n" + str(e)
+            self.logger.critical("Caught exception when connecting to stream %s\n", str(e))
 
     def stream_to_queue(self):
         response = self.connect_to_stream()
@@ -76,17 +79,17 @@ class StreamingForexPrices_OANDA(AbstractPriceStream):
         for line in response.iter_lines(1):
             # check if we have received a stoprequest
             if self.stoprequest.isSet():
-                print("Closing Session")
+                self.logger.debug("Closing Session")
                 response.close()
                 break
             if line:
                 try:
                     msg = json.loads(line)
                 except Exception as e:
-                    print "Caught exception when converting message into json\n" + str(e)
+                    self.logger.error("Caught exception when converting message into json %s\n", str(e))
                     return
                 if msg.has_key("instrument") or msg.has_key("tick"):
-                    print msg
+                    self.logger.debug(msg)
                     instrument = msg["tick"]["instrument"]
                     time = msg["tick"]["time"]
                     bid = msg["tick"]["bid"]
@@ -107,6 +110,7 @@ class StreamingPricesFromFile(AbstractPriceStream):
         self.events_queue = events_queue
         self.cur_prices = {}
         self.stoprequest = stoprequest
+        self.logger = logging.getLogger(__name__)
 
     def stream_to_queue(self):
         #check if file exists
@@ -114,7 +118,7 @@ class StreamingPricesFromFile(AbstractPriceStream):
             f=open(self.csv_file, 'rb')
             f.close()
         except Exception as e:
-            print("Caught exception while opening backtesting file\n" + str(e))
+            self.logger.critical("Caught exception while opening backtesting file %s\n", str(e))
             return
 
         #open file and read from it
@@ -132,17 +136,12 @@ class StreamingPricesFromFile(AbstractPriceStream):
                     self.cur_prices[instrument].update_bid_ask(bid,ask)
                 else:
                     self.cur_prices[instrument] = MarketState(bid,ask)
-                print("instrument = "+str(instrument)+" "
-                    "timestamp = "+str(timestamp)+" "
-                    "bid = "+str(bid)+" "
-                    "ask = "+str(ask)
-                )
                 tev = TickEvent(instrument, timestamp, bid, ask)
                 self.events_queue.put(tev)
                 time.sleep(.05)
                 #do not flood the queue
         except Exception as e:
-            print("Caught exception while reading from backtesting file\n" + str(e))
+            self.logger.critical("Caught exception while reading from backtesting file %s\n", str(e))
             return
         finally:
             file.close()

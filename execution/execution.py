@@ -2,6 +2,7 @@ import httplib
 import urllib
 import Queue
 import json
+import logging
 
 from abc import ABCMeta, abstractmethod
 from quantfxengine.event.event import FillEvent
@@ -30,6 +31,7 @@ class ExecutionAtOANDA(AbstractExecution):
         self.account_id = account_id
         self.conn = self.obtain_connection()
         self.event_queue = event_queue
+        self.logger = logging.getLogger(__name__)
 
     def obtain_connection(self):
         return httplib.HTTPSConnection(self.domain)
@@ -55,10 +57,10 @@ class ExecutionAtOANDA(AbstractExecution):
             try:
                 msg = json.loads(response)
             except Exception as e:
-                print "Caught exception when converting message to json\n" + str(e)
+                self.logger.critical("Caught exception when converting message to json %s\n" + str(e))
                 return
             if msg.has_key("price") and ( msg.has_key("tradeOpened") or msg.has_key("tradeClosed") ):
-                print msg
+                self.logger.debug(msg)
                 instrument = msg["instrument"]
                 price = msg["price"]
                 if msg["tradeOpened"].has_key("units"):
@@ -93,12 +95,13 @@ class MockExecution(AbstractExecution):
     def __init__(self, event_queue, ticker):
         self.event_queue = event_queue
         self.ticker = ticker
+        self.logger = logging.getLogger(__name__)
     def execute_order(self, order_event):
         instrument = order_event.instrument
         units = order_event.units
         order_type = order_event.order_type
         side = order_event.side
-        print("Would have executed: ", order_event)
+        self.logger.debug("Would have executed: %s ", order_event)
         if side == "buy":
             price = self.ticker.cur_prices[instrument].ask
             fevent = FillEvent(instrument, units, "LONG", price)
