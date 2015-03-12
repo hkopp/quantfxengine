@@ -52,7 +52,7 @@ if __name__ == "__main__":
             BACKTESTFILE, events, stoprequest
         )
         # Create the mock execution handler
-        execution = MockExecution()
+        execution = MockExecution(events, prices)
     else:
         # Create the OANDA market price streaming class
         # making sure to provide authentication commands

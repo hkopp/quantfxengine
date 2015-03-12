@@ -1,6 +1,11 @@
 import httplib
 import urllib
+import Queue
+import json
+
 from abc import ABCMeta, abstractmethod
+from quantfxengine.event.event import FillEvent
+from quantfxengine.streaming.streaming import StreamingPricesFromFile
 
 class AbstractExecution(object):
     """
@@ -8,6 +13,9 @@ class AbstractExecution(object):
     Methods:
         execute_order(order_event): takes an order_event and executes
             it
+    Attributes:
+        event_queue: An event queue where we put FillEvents for
+            successfull orders
     """
     __metaclass__ = ABCMeta
 
@@ -49,10 +57,27 @@ class MockExecution(AbstractExecution):
     A mock execution object which does not trade externally
     Very useful for backtesting purposes
     """
+    def __init__(self, event_queue, ticker):
+        self.event_queue = event_queue
+        self.ticker = ticker
     def execute_order(self, order_event):
+        instrument = order_event.instrument
+        units = order_event.units
+        order_type = order_event.order_type
+        side = order_event.side
         print("Would have executed: "
-                "instrument: "+ str(order_event.instrument)+
-                "units: "+ str(order_event.units)+
-                "type: "+ str(order_event.order_type)+
-                "side: "+ str(order_event.side)
+                "instrument: "+ str(instrument)+
+                "units: "+ str(units)+
+                "type: "+ str(order_type)+
+                "side: "+ str(side)
         )
+        if side == "buy":
+            price = self.ticker.cur_prices[instrument].ask
+            fevent = FillEvent(instrument, units, "LONG", price)
+        elif side == "sell":
+            price = self.ticker.cur_prices[instrument].bid
+            fevent = FillEvent(instrument, units, "SHORT", price)
+        else:
+            raise ValueError("side should be 'buy' or 'sell' "\
+                    "but is %s", side)
+        self.event_queue.put(fevent)
