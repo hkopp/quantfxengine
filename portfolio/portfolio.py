@@ -120,10 +120,18 @@ class Portfolio(AbstractPortfolio):
             return True
 
     def close_all_positions(self):
-        for market in self.positions.keys():
-            remove_price = self.ticker.cur_prices[market].bid
-            self.close_position(market, remove_price)
-            #TODO: this also sends orders, the others do not
+        for instrument in self.positions.keys():
+            pos = self.positions[instrument]
+            remove_price = self.ticker.cur_prices[pos.market].bid
+            units = pos.units
+            if pos.side == "SHORT":
+                order = OrderEvent(pos.market, units, "market", "buy")
+            else:
+                order = OrderEvent(pos.market, units, "market", "sell")
+            self.events.put(order)
+            #TODO: this only sends orders, the others do only adjust
+            #the positions tracke by portfolio. This is not what one
+            #would expect
 
     def execute_signal_event(self, signal_event):
         side = signal_event.side

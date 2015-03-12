@@ -33,10 +33,35 @@ def trade(events, strategy, portfolio, execution, stoprequest):
                 elif event.type == 'ORDER':
                     print "Executing order!"
                     execution.execute_order(event)
-                elif event.type == 'Fill':
-                    portfolio.execute_fill_order(event)
+                elif event.type == 'FILL':
+                    print("recv new fill event:", event.side,
+                            event.units)
+                    portfolio.execute_fill_event(event)
+    #execute remaining events
+    while not events.empty():
+        event = events.get()
+        if event is not None:
+            if event.type == 'FILL':
+                #throw everything away except fillevents
+                print("recv new fill event:", event.side,
+                        event_units)
+                portfolio.execute_fill_order(event)
+            else:
+                pass
+    #close all positions
     print "Closing all positions"
     portfolio.close_all_positions()
+    #and execute the resulting order and fill events
+    while not events.empty():
+        event = events.get()
+        if event is not None:
+            if event.type == 'ORDER':
+                print "Executing order!"
+                execution.execute_order(event)
+            elif event.type == 'Fill':
+                print("recv new fill event:", event.side,
+                        event_units)
+                portfolio.execute_fill_order(event)
 
 if __name__ == "__main__":
     events = Queue.Queue() # Queue for communication between threads
