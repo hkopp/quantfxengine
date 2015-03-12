@@ -18,6 +18,21 @@ class TickEvent(Event):
         self.bid = bid
         self.ask = ask
 
+    def __str__(self):
+        return "type: "+ str(self.type)+ \
+            ", instrument: "+ str(self.instrument)+ \
+            ", time: "+ str(self.time)+ \
+            ", bid: "+ str(self.bid)+ \
+            ", ask: "+ str(self.ask)
+
+    def __repr__(self):
+        return "type: "+ str(self.type)+ \
+            ", instrument: "+ str(self.instrument)+ \
+            ", time: "+ str(self.time)+ \
+            ", bid: "+ str(self.bid)+ \
+            ", ask: "+ str(self.ask)
+
+
 class SignalEvent(Event):
     """
     Events for good trading opportunities if they fit in our risk
@@ -32,6 +47,18 @@ class SignalEvent(Event):
         self.instrument = instrument
         self.order_type = order_type
         self.side = side
+
+    def __str__(self):
+        return "type: "+ str(self.type)+ \
+            ", instrument: "+ str(self.instrument)+ \
+            ", order_type: "+ str(self.order_type)+ \
+            ", side: "+ str(self.side)
+
+    def __repr__(self):
+        return "type: "+ str(self.type)+ \
+            ", instrument: "+ str(self.instrument)+ \
+            ", order_type: "+ str(self.order_type)+ \
+            ", side: "+ str(self.side)
 
 class OrderEvent(Event):
     """
@@ -49,6 +76,21 @@ class OrderEvent(Event):
         self.order_type = order_type
         self.side = side
 
+    def __str__(self):
+        return "type: "+ str(self.type)+ \
+            ", instrument: "+ str(self.instrument)+ \
+            ", units: "+ str(self.units)+ \
+            ", order_type: "+ str(self.order_type)+ \
+            ", side: "+ str(self.side)
+
+    def __repr__(self):
+        return "type: "+ str(self.type)+ \
+            ", instrument: "+ str(self.instrument)+ \
+            ", units: "+ str(self.units)+ \
+            ", order_type: "+ str(self.order_type)+ \
+            ", side: "+ str(self.side)
+
+
 class FillEvent(Event):
     """
     This event signals that an order has been filled.
@@ -64,3 +106,17 @@ class FillEvent(Event):
         self.units = units
         self.side = side
         self.price = price
+
+    def __str__(self):
+        return "type: "+ str(self.type)+ \
+            ", instrument: "+ str(self.instrument)+ \
+            ", units: "+ str(self.units)+ \
+            ", side: "+ str(self.side)+ \
+            ", price: "+ str(self.price)
+
+    def __repr__(self):
+        return "type: "+ str(self.type)+ \
+            ", instrument: "+ str(self.instrument)+ \
+            ", units: "+ str(self.units)+ \
+            ", side: "+ str(self.side)+ \
+            ", price: "+ str(self.price)
