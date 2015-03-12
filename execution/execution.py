@@ -51,7 +51,39 @@ class ExecutionAtOANDA(AbstractExecution):
             params, headers
         )
         response = self.conn.getresponse().read()
-        print response
+        if response:
+            try:
+                msg = json.loads(response)
+            except Exception as e:
+                print "Caught exception when converting message to json\n" + str(e)
+                return
+            if msg.has_key("price") and ( msg.has_key("tradeOpened") or msg.has_key("tradeClosed") ):
+                print msg
+                instrument = msg["instrument"]
+                price = msg["price"]
+                if msg["tradeOpened"].has_key("units"):
+                    units = msg["tradeOpened"]["units"]
+                    side = msg["tradeOpened"]["side"]
+                    if side == "buy":
+                        fevent = FillEvent(instrument, units, "LONG", price)
+                    elif side == "sell":
+                        fevent = FillEvent(instrument, units, "SHORT", price)
+                    else:
+                        raise ValueError("side should be 'buy' or 'sell' "\
+                                "but is %s", side)
+                    self.event_queue.put(fevent)
+                else:
+                    for close in msg["tradesClosed"]:
+                        units = close["units"]
+                        side = close["side"]
+                        if side == "buy":
+                            fevent = FillEvent(instrument, units, "LONG", price)
+                        elif side == "sell":
+                            fevent = FillEvent(instrument, units, "SHORT", price)
+                        else:
+                            raise ValueError("side should be 'buy' or 'sell' "\
+                                "but is %s", side)
+                        self.event_queue.put(fevent)
 
 class MockExecution(AbstractExecution):
     """
