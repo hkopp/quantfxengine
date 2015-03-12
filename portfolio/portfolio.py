@@ -9,10 +9,13 @@ class AbstractPortfolio(object):
     This is an abstract portfolio to provide a common interface for
     other risk management modules
     Methods:
-        execute_signal(self, signal_event):
+        execute_signal_event(self, signal_event):
             Takes in a SignalEvent and perhaps outputs OrderEvents
         execute_tick_event(self, tick_event):
-            Takes in a TickEvent and adjusts positions
+            Takes in a TickEvent and adjusts positions, closes some,
+            if necessary
+        execute_fill_event(self, fill_event):
+            Takes in a FillEvent and adjusts positions
     """
     __metaclass__ = ABCMeta
 
