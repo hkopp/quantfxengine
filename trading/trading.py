@@ -87,7 +87,7 @@ if __name__ == "__main__":
         )
         # Create the execution handler making sure to
         # provide authentication commands
-        execution = ExecutionAtOANDA(API_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID)
+        execution = ExecutionAtOANDA(API_DOMAIN, ACCESS_TOKEN, ACCOUNT_ID, events)
 
     # Create the strategy/signal generator, passing the
     # instrument, quantity of units and the events queue

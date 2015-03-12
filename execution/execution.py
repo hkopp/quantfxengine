@@ -24,11 +24,12 @@ class AbstractExecution(object):
         raise NotImplementedError("Need to implement execute_order!")
 
 class ExecutionAtOANDA(AbstractExecution):
-    def __init__(self, domain, access_token, account_id):
+    def __init__(self, domain, access_token, account_id, event_queue):
         self.domain = domain
         self.access_token = access_token
         self.account_id = account_id
         self.conn = self.obtain_connection()
+        self.event_queue = event_queue
 
     def obtain_connection(self):
         return httplib.HTTPSConnection(self.domain)
