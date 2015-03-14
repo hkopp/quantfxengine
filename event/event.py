@@ -26,11 +26,7 @@ class TickEvent(Event):
             ", ask: "+ str(self.ask)
 
     def __repr__(self):
-        return "type: "+ str(self.type)+ \
-            ", instrument: "+ str(self.instrument)+ \
-            ", time: "+ str(self.time)+ \
-            ", bid: "+ str(self.bid)+ \
-            ", ask: "+ str(self.ask)
+        return str(self)
 
 
 class SignalEvent(Event):
@@ -55,10 +51,8 @@ class SignalEvent(Event):
             ", side: "+ str(self.side)
 
     def __repr__(self):
-        return "type: "+ str(self.type)+ \
-            ", instrument: "+ str(self.instrument)+ \
-            ", order_type: "+ str(self.order_type)+ \
-            ", side: "+ str(self.side)
+        return str(self)
+
 
 class OrderEvent(Event):
     """
@@ -84,11 +78,7 @@ class OrderEvent(Event):
             ", side: "+ str(self.side)
 
     def __repr__(self):
-        return "type: "+ str(self.type)+ \
-            ", instrument: "+ str(self.instrument)+ \
-            ", units: "+ str(self.units)+ \
-            ", order_type: "+ str(self.order_type)+ \
-            ", side: "+ str(self.side)
+        return str(self)
 
 
 class FillEvent(Event):
@@ -115,8 +105,4 @@ class FillEvent(Event):
             ", price: "+ str(self.price)
 
     def __repr__(self):
-        return "type: "+ str(self.type)+ \
-            ", instrument: "+ str(self.instrument)+ \
-            ", units: "+ str(self.units)+ \
-            ", side: "+ str(self.side)+ \
-            ", price: "+ str(self.price)
+        return str(self)
