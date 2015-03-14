@@ -121,7 +121,10 @@ class Portfolio(AbstractPortfolio):
             del[self.positions[market]]
             return True
 
-    def close_all_positions(self):
+    def execute_close_all_positions(self):
+        """
+        This function sends OrderEvents to close all open positions
+        """
         for instrument in self.positions.keys():
             pos = self.positions[instrument]
             remove_price = self.ticker.cur_prices[pos.market].bid
@@ -131,9 +134,6 @@ class Portfolio(AbstractPortfolio):
             else:
                 order = OrderEvent(pos.market, units, "market", "sell")
             self.events.put(order)
-            #TODO: this only sends orders, the others do only adjust
-            #the positions tracke by portfolio. This is not what one
-            #would expect
 
     def execute_signal_event(self, signal_event):
         side = signal_event.side

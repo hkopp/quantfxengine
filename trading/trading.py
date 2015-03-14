@@ -50,7 +50,7 @@ def trade(events, strategy, portfolio, execution, stoprequest):
                 pass
     #close all positions
     logger.info("Closing all positions")
-    portfolio.close_all_positions()
+    portfolio.execute_close_all_positions()
     #and execute the resulting order and fill events
     while not events.empty():
         event = events.get()
