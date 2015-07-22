@@ -45,7 +45,7 @@ def trade(events, strategy, portfolio, execution, stoprequest):
             if event.type == 'FILL':
                 #throw everything away except fillevents
                 logger.info("recv new fill event: %s", event)
-                portfolio.execute_fill_order(event)
+                portfolio.execute_fill_event(event)
             else:
                 pass
     #close all positions
@@ -60,7 +60,7 @@ def trade(events, strategy, portfolio, execution, stoprequest):
                 execution.execute_order(event)
             elif event.type == 'Fill':
                 logger.info("recv new fill event: %s", event)
-                portfolio.execute_fill_order(event)
+                portfolio.execute_fill_event(event)
 
 if __name__ == "__main__":
     logging.config.fileConfig('logging.conf')
