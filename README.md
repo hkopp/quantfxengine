@@ -15,6 +15,10 @@ Backtesting is also possible if you have a suitable csv-file.
 
 If you want to adjust the logging, look at logging.conf.
 
+##Packages
+Before you can start, you need the following python-packages:
+-requests
+
 ##How it works
 The main function is in trade/trading.py. We open two threads, one who
 streams prices from a file or from a broker in streaming/streaming.py.
@@ -36,3 +40,8 @@ the price at which the decision to invest was made.
 
 FillEvents get handled by the portfolio to keep track of the current
 positions.
+
+
+#Other
+Tests are done with nosetests and are bundled per object in a separate
+folder.
